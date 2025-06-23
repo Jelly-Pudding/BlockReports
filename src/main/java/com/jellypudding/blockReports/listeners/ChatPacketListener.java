@@ -93,48 +93,79 @@ public class ChatPacketListener extends ChannelDuplexHandler {
                 // Convert player chat to system chat to strip server signatures
                 // Use reflection to access the packet fields and properly format the message
                 try {
-                    Field messageField = ClientboundPlayerChatPacket.class.getDeclaredField("message");
-                    Field chatTypeField = ClientboundPlayerChatPacket.class.getDeclaredField("chatType");
+                    Field messageField = null;
+                    Field chatTypeField = null;
+                    
+                    // Try different possible field names for message
+                    String[] messageFieldNames = {"body", "message", "signedContent", "content", "unsignedContent"};
+                    for (String fieldName : messageFieldNames) {
+                        try {
+                            messageField = ClientboundPlayerChatPacket.class.getDeclaredField(fieldName);
+                            break;
+                        } catch (NoSuchFieldException ignored) {}
+                    }
+                    
+                    // Try different possible field names for chat type
+                    String[] chatTypeFieldNames = {"chatType", "type", "boundChatType"};
+                    for (String fieldName : chatTypeFieldNames) {
+                        try {
+                            chatTypeField = ClientboundPlayerChatPacket.class.getDeclaredField(fieldName);
+                            break;
+                        } catch (NoSuchFieldException ignored) {}
+                    }
+                    
+                    if (messageField == null) {
+                        plugin.getLogger().warning("Could not find message field in ClientboundPlayerChatPacket");
+                        return;
+                    }
+                    if (chatTypeField == null) {
+                        plugin.getLogger().warning("Could not find chatType field in ClientboundPlayerChatPacket");
+                        return;
+                    }
                     
                     messageField.setAccessible(true);
                     chatTypeField.setAccessible(true);
                     
-                    Component rawMessage = (Component) messageField.get(chatPacket);
+                    Object messageFieldValue = messageField.get(chatPacket);
                     ChatType.Bound chatTypeBound = (ChatType.Bound) chatTypeField.get(chatPacket);
                     
-                    // Resolve the chat type and decorate the message properly
-                    Method resolveMethod = ChatType.Bound.class.getDeclaredMethod("resolve", net.minecraft.core.RegistryAccess.class);
-                    resolveMethod.setAccessible(true);
+                    Component rawMessage = null;
                     
-                    Optional<?> resolvedChatType = (Optional<?>) 
-                        resolveMethod.invoke(chatTypeBound, MinecraftServer.getServer().registryAccess());
-                    
-                    Component decoratedMessage;
-                    if (resolvedChatType.isPresent()) {
-                        // Get the resolved chat type object
-                        Object chatTypeNetwork = resolvedChatType.get();
-                        
-                        // Get the chat decoration method
-                        Method chatMethod = chatTypeNetwork.getClass().getDeclaredMethod("chat");
-                        chatMethod.setAccessible(true);
-                        Object chatFunction = chatMethod.invoke(chatTypeNetwork);
-                        
-                        // Decorate the message with proper formatting
-                        Method decorateMethod = chatFunction.getClass().getDeclaredMethod("decorate", Component.class);
-                        decorateMethod.setAccessible(true);
-                        decoratedMessage = (Component) decorateMethod.invoke(chatFunction, rawMessage);
-                    } else {
-                        // Fallback to raw message if resolution fails
-                        decoratedMessage = rawMessage;
+                    // Extract the actual message content based on field type
+                    if (messageFieldValue instanceof Component) {
+                        rawMessage = (Component) messageFieldValue;
+                    } else if (messageFieldValue != null && messageField.getName().equals("body")) {
+                        // Extract content from the Packed body object
+                        try {
+                            Method contentMethod = messageFieldValue.getClass().getDeclaredMethod("content");
+                            contentMethod.setAccessible(true);
+                            String textContent = (String) contentMethod.invoke(messageFieldValue);
+                            
+                            if (textContent != null) {
+                                rawMessage = Component.literal(textContent);
+                            }
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Failed to extract content from body: " + e.getMessage());
+                        }
                     }
+
+                    // Check if we have a valid message to work with
+                    if (rawMessage == null) {
+                        if (plugin.isLoggingEnabled()) {
+                            plugin.getLogger().info("No message content found, skipping packet conversion");
+                        }
+                        super.write(ctx, packet, promise);
+                        return;
+                    }
+                    
+                    // Use the direct decorate method available in ChatType.Bound
+                    Method decorateMethod = ChatType.Bound.class.getDeclaredMethod("decorate", Component.class);
+                    decorateMethod.setAccessible(true);
+                    Component decoratedMessage = (Component) decorateMethod.invoke(chatTypeBound, rawMessage);
                     
                     // Create system chat packet with the properly decorated message
                     ClientboundSystemChatPacket systemChatPacket = new ClientboundSystemChatPacket(decoratedMessage, false);
-                    
-                    if (plugin.isLoggingEnabled()) {
-                        plugin.getLogger().info("Converted player chat packet to system chat packet");
-                    }
-                    
+
                     super.write(ctx, systemChatPacket, promise);
                     return;
                 } catch (Exception e) {
