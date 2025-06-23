@@ -1,29 +1,16 @@
 # BlockReports Configuration
-# Prevents chat reporting by stripping message signatures and enforcing server-side protection.
+# A plugin to prevent chat reporting on Paper 1.21.6
+
+# Enable debug logging
+enable-logging: true
 
 # Strip chat signatures from outgoing chat packets
-# This converts signed player chat messages to unsigned system messages
-# preventing chat reporting while maintaining chat functionality
+# This converts signed chat messages to unsigned system messages
 strip-chat-signatures: true
 
-# Hide the "secure chat" warning popup that appears to clients
-# This modifies server data packets to prevent the warning from showing
+# Hide the secure chat warning popup
+# This modifies server data packets to prevent the client from showing warnings
 hide-secure-chat-warning: true
-
-# Show a message to players when they join explaining that chat reporting is disabled
-show-join-message: true
-
-# The message shown to players when they join (supports MiniMessage format)
-# See https://docs.advntr.dev/minimessage/format.html for formatting options
-join-message: "<gray>[BlockReports] Chat reporting is disabled on this server"
-
-# Prefix used in all plugin messages (supports MiniMessage format)
-prefix: "<dark_gray>[<gold>BlockReports<dark_gray>]"
-
-# Enable debug logging for troubleshooting.
-# Only enable this if you are experiencing issues with the plugin
-# and want to make a bug report.
-enable-logging: true
 
 # ============================================================================
 # IMPORTANT NOTES:
