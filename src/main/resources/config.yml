@@ -6,24 +6,16 @@ enable-logging: true
 
 # Strip chat signatures from outgoing chat packets
 # This converts signed chat messages to unsigned system messages
-strip-chat-signatures: true
+strip-server-signatures: true
 
 # Hide the secure chat warning popup
 # This modifies server data packets to prevent the client from showing warnings
 hide-secure-chat-warning: true
 
-# ============================================================================
-# IMPORTANT NOTES:
-# ============================================================================
-# 
-# This plugin uses PacketEvents to intercept and modify chat packets at the
-# protocol level for maximum effectiveness. It:
-#
-# 1. Converts signed player chat messages to unsigned system messages
-# 2. Cancels chat header packets that contain signature metadata  
-# 3. Modifies server data to hide secure chat warnings
-#
-# This provides comprehensive protection against chat reporting without
-# requiring server.properties changes, though setting 
-# enforce-secure-profile=false is still recommended.
-# ============================================================================ 
+# Block chat session update packets from clients
+# This prevents clients from updating their chat session keys
+block-chat-session-updates: true
+
+# Prevent kicks related to chat reporting
+# This handles various kick scenarios related to secure chat
+prevent-chat-kicks: true

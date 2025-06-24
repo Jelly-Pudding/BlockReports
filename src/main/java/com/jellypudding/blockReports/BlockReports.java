@@ -6,9 +6,9 @@ import com.jellypudding.blockReports.listeners.KickListener;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.DedicatedServerProperties;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -55,13 +55,11 @@ public final class BlockReports extends JavaPlugin implements Listener {
         getLogger().info("BlockReports has been disabled.");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (packetListener != null) {
-            // Delay injection slightly to ensure player is fully loaded.
-            Bukkit.getScheduler().runTaskLater(this, () -> {
-                packetListener.injectPlayer(event.getPlayer());
-            }, 5L);
+            // Inject immediately on join with highest priority
+            packetListener.injectPlayer(event.getPlayer());
         }
     }
 
