@@ -87,7 +87,9 @@ public final class BlockReports extends JavaPlugin implements Listener {
             boolean currentValue = (boolean) enforceSecureProfileField.get(properties);
             if (currentValue) {
                 enforceSecureProfileField.set(properties, false);
-                getLogger().info("Enforced enforce-secure-profile=false in server properties");
+                getLogger().info("Changed enforce-secure-profile from true to false in server properties");
+            } else {
+                getLogger().info("Server property enforce-secure-profile is already set to false (a good thing)");
             }
         } catch (Exception e) {
             getLogger().warning("Failed to enforce server properties: " + e.getMessage());
