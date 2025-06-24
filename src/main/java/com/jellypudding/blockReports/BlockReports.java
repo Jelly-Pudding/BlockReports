@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BlockReports extends JavaPlugin implements Listener {
@@ -60,6 +61,13 @@ public final class BlockReports extends JavaPlugin implements Listener {
         if (packetListener != null) {
             // Inject immediately on join with highest priority
             packetListener.injectPlayer(event.getPlayer());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        if (packetListener != null) {
+            packetListener.uninjectPlayer(event.getPlayer());
         }
     }
 

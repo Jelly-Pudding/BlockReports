@@ -1,7 +1,6 @@
 package com.jellypudding.blockReports.listeners;
 
 import com.jellypudding.blockReports.BlockReports;
-import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -9,7 +8,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 public class KickListener implements Listener {
 
@@ -63,21 +61,6 @@ public class KickListener implements Listener {
         if (plugin.isLoggingEnabled()) {
             plugin.getLogger().info("Prevented chat-related kick for player " + 
                 event.getPlayer().getName() + ": " + reason);
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        if (plugin.getPacketListener() != null) {
-            plugin.getPacketListener().uninjectPlayer(event.getPlayer());
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onAsyncChat(AsyncChatEvent event) {
-        // Inject packet listener for new players who join and chat
-        if (plugin.getPacketListener() != null) {
-            plugin.getPacketListener().injectPlayer(event.getPlayer());
         }
     }
 }
