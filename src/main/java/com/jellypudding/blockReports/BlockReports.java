@@ -46,6 +46,8 @@ public final class BlockReports extends JavaPlugin implements Listener {
         getLogger().info("BlockReports has been enabled. " +
                          "Strip signatures=" + isStripServerSignatures() + 
                          ", Hide warnings=" + isHideSecureChatWarning() + 
+                         ", Neutralise sessions=" + isNeutraliseChatSessions() +
+                         ", Prevent kicks=" + isPreventChatKicks() +
                          ", Debug=" + isLoggingEnabled());
     }
 
@@ -126,8 +128,8 @@ public final class BlockReports extends JavaPlugin implements Listener {
         return config.getBoolean("hide-secure-chat-warning", true);
     }
 
-    public boolean isBlockChatSessionUpdates() {
-        return config.getBoolean("block-chat-session-updates", true);
+    public boolean isNeutraliseChatSessions() {
+        return config.getBoolean("neutralise-chat-sessions", true);
     }
 
     public boolean isPreventChatKicks() {

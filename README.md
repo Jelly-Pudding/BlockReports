@@ -9,7 +9,7 @@
 ## Features
 * **Strips chat signatures** - Converts signed chat messages to unsigned system messages, making reports unverifiable.
 * **Hides warning popups** - Eliminates the annoying "Chat messages can't be verified" popup for players.
-* **Blocks chat session updates** - Prevents clients from establishing signature keys with the server.
+* **Neutralises chat sessions** - Intercepts chat session update packets and replaces public keys with null values to prevent secure signature establishment.
 * **Prevents chat-related kicks** - Stops players from being kicked for signature validation issues.
 * **Automatic server configuration** - Disables `enforce-secure-profile` in server properties (this setting forces players to have signed profiles to join).
 * **Lightweight and efficient** - Minimal performance impact with targeted packet manipulation.
@@ -31,9 +31,10 @@ strip-server-signatures: true
 # Hide the secure chat warning popup
 hide-secure-chat-warning: true
 
-# Block chat session update packets from clients
-# This prevents clients from updating their chat session keys
-block-chat-session-updates: true
+# Neutralise chat session update packets from clients  
+# This intercepts incoming chat session packets and replaces the public key with null,
+# preventing secure chat establishment while maintaining proper packet flow to avoid kick issues
+neutralise-chat-sessions: true
 
 # Prevent kicks related to chat reporting
 # This handles various kick scenarios related to secure chat
@@ -48,10 +49,13 @@ enable-logging: true
 BlockReports operates by:
 1. **Intercepting outbound chat packets** and removing cryptographic signatures
 2. **Spoofing the secure profile flag** in login packets to prevent client warnings
-3. **Blocking incoming chat session updates** to prevent signature key establishment
+3. **Neutralising incoming chat session updates** to prevent signature key establishment
 4. **Converting signed messages to system messages** that cannot be reported
 
 This approach ensures chat reports become unverifiable and ineffective while maintaining full chat functionality.
+
+## Known Issues
+* **Rare chat kicks**: In very specific scenarios (rapid typing + simultaneous disconnections), players may occasionally get kicked with "Detected missed or reordered chat message from server". Players can simply reconnect.
 
 ## Support Me
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K715TC1R)

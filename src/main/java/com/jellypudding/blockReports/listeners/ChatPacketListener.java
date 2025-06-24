@@ -11,6 +11,7 @@ import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
+import net.minecraft.network.chat.RemoteChatSession;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -46,7 +47,7 @@ public class ChatPacketListener extends ChannelDuplexHandler {
             var connection = ConnectionHelper.requireConnectionByAddress(address);
             var channel = ConnectionHelper.getConnectionChannel(connection);
             
-            // Remove existing handler if present
+            // Remove existing handler if present on this specific channel only
             if (channel.pipeline().get(HANDLER_NAME) != null) {
                 channel.pipeline().remove(HANDLER_NAME);
             }
@@ -81,7 +82,7 @@ public class ChatPacketListener extends ChannelDuplexHandler {
     
     public void uninjectPlayer(Player player) {
         try {
-            var connection = ConnectionHelper.findLatestConnectionByAddress(player.getAddress().getAddress());
+            var connection = ConnectionHelper.findConnectionByAddress(player.getAddress().getAddress());
             if (connection != null) {
                 var channel = connection.channel;
                 if (channel != null && channel.pipeline().get(HANDLER_NAME) != null) {
@@ -162,15 +163,30 @@ public class ChatPacketListener extends ChannelDuplexHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object packet) throws Exception {
         // Handle incoming packets
-        if (packet instanceof ServerboundChatSessionUpdatePacket) {
-            if (plugin.isBlockChatSessionUpdates()) {
-                if (plugin.isLoggingEnabled()) {
-                    plugin.getLogger().info("Blocked chat session update packet");
+        if (packet instanceof ServerboundChatSessionUpdatePacket sessionUpdatePacket) {
+            if (plugin.isNeutraliseChatSessions()) {
+                try {
+                    // Neutralise the packet by creating a new one with null public key
+                    // This maintains communication flow while preventing secure session establishment
+                    RemoteChatSession.Data originalData = sessionUpdatePacket.chatSession();
+                    RemoteChatSession.Data neutralisedData = new RemoteChatSession.Data(originalData.sessionId(), null);
+                    ServerboundChatSessionUpdatePacket neutralisedPacket = new ServerboundChatSessionUpdatePacket(neutralisedData);
+                    
+                    if (plugin.isLoggingEnabled()) {
+                        plugin.getLogger().info("✓ Neutralised chat session update packet");
+                    }
+
+                    super.channelRead(ctx, neutralisedPacket);
+                    return;
+                } catch (Exception e) {
+                    if (plugin.isLoggingEnabled()) {
+                        plugin.getLogger().warning("Failed to neutralise chat session packet - falling back to blocking: " + e.getMessage());
+                    }
+                    return;
                 }
-                return; // Block the packet
             }
         }
-        
+
         super.channelRead(ctx, packet);
     }
 }

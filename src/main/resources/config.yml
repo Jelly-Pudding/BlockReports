@@ -8,9 +8,10 @@ strip-server-signatures: true
 # Hide the secure chat warning popup
 hide-secure-chat-warning: true
 
-# Block chat session update packets from clients
-# This prevents clients from updating their chat session keys
-block-chat-session-updates: true
+# Neutralise chat session update packets from clients
+# This intercepts incoming chat session packets and replaces the public key with null,
+# preventing secure chat establishment while maintaining proper packet flow to avoid kick issues
+neutralise-chat-sessions: true
 
 # Prevent kicks related to chat reporting
 # This handles various kick scenarios related to secure chat

@@ -25,10 +25,6 @@ public class ConnectionHelper {
         return null;
     }
 
-    /**
-     * Finds the most recent connection for the given IP address
-     * This helps when multiple players connect from the same IP.
-     */
     public static Connection findLatestConnectionByAddress(InetAddress playerAddress) {
         Connection latestConnection = null;
         for (Connection activeConnection : getAllServerConnections()) {
@@ -64,7 +60,7 @@ public class ConnectionHelper {
         }
     }
 
-    private static Iterable<Connection> getAllServerConnections() {
+    public static Iterable<Connection> getAllServerConnections() {
         return MinecraftServer.getServer().getConnection().getConnections();
     }
 
