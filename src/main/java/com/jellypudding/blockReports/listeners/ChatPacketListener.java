@@ -1,16 +1,17 @@
 package com.jellypudding.blockReports.listeners;
 
 import com.jellypudding.blockReports.BlockReports;
+import com.jellypudding.blockReports.util.ConnectionHelper;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
 import net.minecraft.network.protocol.game.ServerboundChatSessionUpdatePacket;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
@@ -37,18 +38,25 @@ public class ChatPacketListener extends ChannelDuplexHandler {
     }
     
     public void injectPlayer(Player player) {
+        injectPlayer(player, player.getAddress().getAddress());
+    }
+    
+    public void injectPlayer(Player player, java.net.InetAddress address) {
         try {
-            var serverPlayer = ((CraftPlayer) player).getHandle();
-            var channel = serverPlayer.connection.connection.channel;
+            var connection = ConnectionHelper.requireConnectionByAddress(address);
+            var channel = ConnectionHelper.getConnectionChannel(connection);
             
             // Remove existing handler if present
             if (channel.pipeline().get(HANDLER_NAME) != null) {
                 channel.pipeline().remove(HANDLER_NAME);
             }
 
-            // Add our handler before the packet encoder
-            channel.pipeline().addBefore("packet_handler", HANDLER_NAME, 
-                new ChatPacketListener(plugin));
+            // Inject before packet_handler to catch all packets including login
+            if (channel.pipeline().get("packet_handler") != null) {
+                channel.pipeline().addBefore("packet_handler", HANDLER_NAME, new ChatPacketListener(plugin));
+            } else {
+                channel.pipeline().addLast(HANDLER_NAME, new ChatPacketListener(plugin));
+            }
             
             if (plugin.isLoggingEnabled()) {
                 plugin.getLogger().info("✓ Injected packet listener for player: " + player.getName());
@@ -73,11 +81,12 @@ public class ChatPacketListener extends ChannelDuplexHandler {
     
     public void uninjectPlayer(Player player) {
         try {
-            var serverPlayer = ((CraftPlayer) player).getHandle();
-            var channel = serverPlayer.connection.connection.channel;
-            
-            if (channel.pipeline().get(HANDLER_NAME) != null) {
-                channel.pipeline().remove(HANDLER_NAME);
+            var connection = ConnectionHelper.findConnectionByAddress(player.getAddress().getAddress());
+            if (connection != null) {
+                var channel = connection.channel;
+                if (channel != null && channel.pipeline().get(HANDLER_NAME) != null) {
+                    channel.pipeline().remove(HANDLER_NAME);
+                }
             }
         } catch (Exception e) {
             plugin.getLogger().warning("Failed to remove packet listener for player " + 
@@ -87,8 +96,26 @@ public class ChatPacketListener extends ChannelDuplexHandler {
     
     @Override
     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) throws Exception {
-        // Handle outgoing packets
-        if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
+        // Handle outgoing packets        
+        if (packet instanceof ClientboundLoginPacket loginPacket && plugin.isHideSecureChatWarning()) {
+            packet = new ClientboundLoginPacket(
+                loginPacket.playerId(),
+                loginPacket.hardcore(),
+                loginPacket.levels(),
+                loginPacket.maxPlayers(),
+                loginPacket.chunkRadius(),
+                loginPacket.simulationDistance(),
+                loginPacket.reducedDebugInfo(),
+                loginPacket.showDeathScreen(),
+                loginPacket.doLimitedCrafting(),
+                loginPacket.commonPlayerSpawnInfo(),
+                true // Pretend enforce-secureprofile is true to hide the popup warning.
+            );
+            
+            if (plugin.isLoggingEnabled()) {
+                plugin.getLogger().info("✓ Spoofed secure profile in login packet to hide chat warning");
+            }
+        } else if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
             if (plugin.isStripServerSignatures()) {
                 // Convert player chat to system chat to strip server signatures
                 try {

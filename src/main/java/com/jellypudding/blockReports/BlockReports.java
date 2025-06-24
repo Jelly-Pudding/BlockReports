@@ -10,7 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -29,8 +29,10 @@ public final class BlockReports extends JavaPlugin implements Listener {
         // Enforce the enforce-secure-profile setting in server.properties
         enforceServerProperties();
 
-        // Initialise and inject packet listener
+        // Initialise packet listener
         packetListener = new ChatPacketListener(this);
+        
+        // Inject for currently online players (if any)
         packetListener.inject();
 
         // Register listeners
@@ -57,10 +59,11 @@ public final class BlockReports extends JavaPlugin implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerLogin(PlayerLoginEvent event) {
         if (packetListener != null) {
-            // Inject immediately on join with highest priority
-            packetListener.injectPlayer(event.getPlayer());
+            // Inject using IP address before login completes to catch the login packet
+            // that is needed to pretend the enforce-secure-profile setting is true.
+            packetListener.injectPlayer(event.getPlayer(), event.getAddress());
         }
     }
 
