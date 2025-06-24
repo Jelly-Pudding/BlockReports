@@ -25,13 +25,30 @@ public class ConnectionHelper {
         return null;
     }
 
+    /**
+     * Finds the most recent connection for the given IP address
+     * This helps when multiple players connect from the same IP.
+     */
+    public static Connection findLatestConnectionByAddress(InetAddress playerAddress) {
+        Connection latestConnection = null;
+        for (Connection activeConnection : getAllServerConnections()) {
+            if (activeConnection.getRemoteAddress() instanceof InetSocketAddress socketAddr) {
+                if (socketAddr.getAddress().equals(playerAddress)) {
+                    // Return the last one found (most recent connection)
+                    latestConnection = activeConnection;
+                }
+            }
+        }
+        return latestConnection;
+    }
+
     public static Channel getConnectionChannel(Connection connection) {
         return Objects.requireNonNull(connection.channel, 
             "Network channel is null for connection: " + connection.getRemoteAddress());
     }
 
     public static Connection requireConnectionByAddress(InetAddress address) {
-        Connection found = findConnectionByAddress(address);
+        Connection found = findLatestConnectionByAddress(address);
         return Objects.requireNonNull(found, 
             "No active connection found for address: " + address);
     }

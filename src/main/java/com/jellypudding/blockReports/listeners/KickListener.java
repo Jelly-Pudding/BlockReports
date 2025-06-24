@@ -17,7 +17,7 @@ public class KickListener implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerKick(PlayerKickEvent event) {
         if (!plugin.isPreventChatKicks()) {
             return;

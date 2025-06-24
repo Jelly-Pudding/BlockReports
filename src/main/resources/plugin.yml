@@ -3,8 +3,8 @@ version: '1.0-SNAPSHOT'
 main: com.jellypudding.blockReports.BlockReports
 api-version: '1.21'
 author: AlphaAlex115
-description: Prevents chat reporting by stripping message signatures and enforcing server-side protection.
-website: wwww.minecraftoffline.net
+description: Blocks Minecraft chat reporting by stripping signatures, hiding warning popups, and preventing signature-based kicks.
+website: www.minecraftoffline.net
 
 commands:
   blockreports:

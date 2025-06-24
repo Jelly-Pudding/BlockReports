@@ -81,7 +81,7 @@ public class ChatPacketListener extends ChannelDuplexHandler {
     
     public void uninjectPlayer(Player player) {
         try {
-            var connection = ConnectionHelper.findConnectionByAddress(player.getAddress().getAddress());
+            var connection = ConnectionHelper.findLatestConnectionByAddress(player.getAddress().getAddress());
             if (connection != null) {
                 var channel = connection.channel;
                 if (channel != null && channel.pipeline().get(HANDLER_NAME) != null) {
