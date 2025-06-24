@@ -24,7 +24,7 @@ public class ChatPacketListener extends ChannelDuplexHandler {
     public ChatPacketListener(BlockReports plugin) {
         this.plugin = plugin;
     }
-    
+
     public void inject() {
         // Inject for all online players
         for (Player player : Bukkit.getOnlinePlayers()) {

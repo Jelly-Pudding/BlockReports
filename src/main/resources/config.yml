@@ -1,15 +1,11 @@
 # BlockReports Configuration
 # A plugin to prevent chat reporting on Paper 1.21.6
 
-# Enable debug logging
-enable-logging: true
-
 # Strip chat signatures from outgoing chat packets
 # This converts signed chat messages to unsigned system messages
 strip-server-signatures: true
 
 # Hide the secure chat warning popup
-# This modifies server data packets to prevent the client from showing warnings
 hide-secure-chat-warning: true
 
 # Block chat session update packets from clients
@@ -19,3 +15,7 @@ block-chat-session-updates: true
 # Prevent kicks related to chat reporting
 # This handles various kick scenarios related to secure chat
 prevent-chat-kicks: true
+
+# Enable debug logging - only enable this for development
+# as it's verbose.
+enable-logging: true
