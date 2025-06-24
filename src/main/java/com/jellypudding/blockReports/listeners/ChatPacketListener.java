@@ -169,6 +169,8 @@ public class ChatPacketListener extends ChannelDuplexHandler {
                     // Neutralise the packet by creating a new one with null public key
                     // This maintains communication flow while preventing secure session establishment
                     RemoteChatSession.Data originalData = sessionUpdatePacket.chatSession();
+                    // Intentionally pass null to neutralise the public key - this breaks secure chat while maintaining packet flow
+                    @SuppressWarnings("null")
                     RemoteChatSession.Data neutralisedData = new RemoteChatSession.Data(originalData.sessionId(), null);
                     ServerboundChatSessionUpdatePacket neutralisedPacket = new ServerboundChatSessionUpdatePacket(neutralisedData);
                     
