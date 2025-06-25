@@ -1,22 +1,21 @@
 # BlockReports Configuration
-# A plugin to prevent chat reporting on Paper 1.21.6
 
-# Strip chat signatures from outgoing chat packets
-# This converts signed chat messages to unsigned system messages
+# Strip chat signatures from outgoing chat packets.
+# This converts signed chat messages to unsigned system messages.
 strip-server-signatures: true
 
-# Hide the secure chat warning popup
+# Hide the secure chat warning popup.
 hide-secure-chat-warning: true
 
-# Neutralise chat session update packets from clients
+# Neutralise chat session update packets from clients.
 # This intercepts incoming chat session packets and replaces the public key with null,
-# preventing secure chat establishment while maintaining proper packet flow to avoid kick issues
+# preventing secure chat establishment while maintaining proper packet flow to avoid kick issues.
 neutralise-chat-sessions: true
 
-# Prevent kicks related to chat reporting
-# This handles various kick scenarios related to secure chat
+# Prevent kicks related to chat reporting.
+# This handles various kick scenarios related to secure chat.
 prevent-chat-kicks: true
 
 # Enable debug logging - only enable this for development
 # as it's verbose.
-enable-logging: true
+enable-logging: false

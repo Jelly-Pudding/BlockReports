@@ -26,20 +26,20 @@ public final class BlockReports extends JavaPlugin implements Listener {
         saveDefaultConfig();
         loadConfig();
 
-        // Enforce the enforce-secure-profile setting in server.properties
+        // Enforce the enforce-secure-profile setting in server.properties.
         enforceServerProperties();
 
-        // Initialise packet listener
+        // Initialise packet listener.
         packetListener = new ChatPacketListener(this);
         
-        // Inject for currently online players (if any)
+        // Inject for currently online players (if any).
         packetListener.inject();
 
-        // Register listeners
+        // Register listeners.
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new KickListener(this), this);
 
-        // Register command
+        // Register command.
         getCommand("blockreports").setExecutor(new BlockReportsCommand(this));
         getCommand("blockreports").setTabCompleter(new BlockReportsCommand(this));
 
@@ -105,7 +105,7 @@ public final class BlockReports extends JavaPlugin implements Listener {
         reloadConfig();
         loadConfig();
 
-        // Reinject packet listener with new settings
+        // Reinject packet listener with new settings.
         if (packetListener != null) {
             packetListener.uninject();
             packetListener.inject();
