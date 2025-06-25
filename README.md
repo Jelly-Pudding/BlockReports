@@ -54,8 +54,5 @@ BlockReports operates by:
 
 This approach ensures chat reports become unverifiable and ineffective while maintaining full chat functionality.
 
-## Known Issues
-* **Rare chat kicks**: In very specific scenarios (rapid typing + simultaneous disconnections), players may occasionally get kicked with "Detected missed or reordered chat message from server". Players can simply reconnect.
-
 ## Support Me
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K715TC1R)

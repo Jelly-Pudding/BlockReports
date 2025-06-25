@@ -17,7 +17,7 @@ public class ConnectionHelper {
     public static Connection findConnectionByAddress(InetAddress playerAddress) {
         for (Connection activeConnection : getAllServerConnections()) {
             if (activeConnection.getRemoteAddress() instanceof InetSocketAddress socketAddr) {
-                if (socketAddr.getAddress().equals(playerAddress)) {
+                if (socketAddr.getAddress() == playerAddress) {
                     return activeConnection;
                 }
             }
@@ -29,7 +29,7 @@ public class ConnectionHelper {
         Connection latestConnection = null;
         for (Connection activeConnection : getAllServerConnections()) {
             if (activeConnection.getRemoteAddress() instanceof InetSocketAddress socketAddr) {
-                if (socketAddr.getAddress().equals(playerAddress)) {
+                if (socketAddr.getAddress() == playerAddress) {
                     // Return the last one found (most recent connection)
                     latestConnection = activeConnection;
                 }

@@ -94,10 +94,10 @@ public class ChatPacketListener extends ChannelDuplexHandler {
                 player.getName() + ": " + e.getMessage());
         }
     }
-    
+
     @Override
     public void write(ChannelHandlerContext ctx, Object packet, ChannelPromise promise) throws Exception {
-        // Handle outgoing packets        
+        // Handle outgoing packets
         if (packet instanceof ClientboundLoginPacket loginPacket && plugin.isHideSecureChatWarning()) {
             packet = new ClientboundLoginPacket(
                 loginPacket.playerId(),
