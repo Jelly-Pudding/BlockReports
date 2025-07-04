@@ -1,5 +1,5 @@
 name: BlockReports
-version: '1.0-SNAPSHOT'
+version: '1.0'
 main: com.jellypudding.blockReports.BlockReports
 api-version: '1.21'
 author: AlphaAlex115

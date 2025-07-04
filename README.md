@@ -1,5 +1,5 @@
 # BlockReports Plugin
-**BlockReports** is a Minecraft Paper 1.21.6 plugin that prevents chat reporting by neutralising Minecraft's chat signature system and blocking report-related functionality.
+**BlockReports** is a Minecraft Paper 1.21.7 plugin that prevents chat reporting by neutralising Minecraft's chat signature system and blocking report-related functionality.
 
 ## Installation
 1. Download the latest release [here](https://github.com/Jelly-Pudding/BlockReports/releases/latest).
