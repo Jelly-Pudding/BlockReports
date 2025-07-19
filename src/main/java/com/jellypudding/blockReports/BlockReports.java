@@ -10,7 +10,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import io.papermc.paper.event.connection.PlayerConnectionValidateLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -61,11 +61,11 @@ public final class BlockReports extends JavaPlugin implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerLogin(PlayerLoginEvent event) {
+    public void onPlayerLogin(PlayerConnectionValidateLoginEvent event) {
         if (packetListener != null) {
             // Inject using IP address before login completes to catch the login packet
             // that is needed to pretend the enforce-secure-profile setting is true.
-            packetListener.injectPlayer(event.getPlayer(), event.getAddress());
+            packetListener.injectPlayer(null, event.getConnection().getClientAddress().getAddress());
         }
     }
 

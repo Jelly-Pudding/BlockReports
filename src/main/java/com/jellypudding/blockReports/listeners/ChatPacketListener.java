@@ -60,12 +60,14 @@ public class ChatPacketListener extends ChannelDuplexHandler {
             }
             
             if (plugin.isLoggingEnabled()) {
-                plugin.getLogger().info("✓ Injected packet listener for player: " + player.getName());
+                String playerName = (player != null) ? player.getName() : address.getHostAddress();
+                plugin.getLogger().info("✓ Injected packet listener for player: " + playerName);
             }
                 
         } catch (Exception e) {
+            String playerName = (player != null) ? player.getName() : address.getHostAddress();
             plugin.getLogger().warning("Failed to inject packet listener for player " + 
-                player.getName() + ": " + e.getMessage());
+                playerName + ": " + e.getMessage());
         }
     }
     
