@@ -1,5 +1,5 @@
 name: BlockReports
-version: '1.1'
+version: '1.2'
 main: com.jellypudding.blockReports.BlockReports
 api-version: '1.21'
 author: AlphaAlex115
@@ -10,6 +10,7 @@ commands:
   blockreports:
     description: "BlockReports management commands"
     usage: "/blockreports reload"
+    permission: blockreports.admin
     aliases: [br]
 
 permissions:

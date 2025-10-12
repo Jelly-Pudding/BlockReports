@@ -43,6 +43,10 @@ public final class BlockReports extends JavaPlugin implements Listener {
         getCommand("blockreports").setExecutor(new BlockReportsCommand(this));
         getCommand("blockreports").setTabCompleter(new BlockReportsCommand(this));
 
+        // Initialise bStats
+        int pluginId = 27559;
+        new Metrics(this, pluginId);
+
         getLogger().info("BlockReports has been enabled. " +
                          "Strip signatures=" + isStripServerSignatures() + 
                          ", Hide warnings=" + isHideSecureChatWarning() + 
