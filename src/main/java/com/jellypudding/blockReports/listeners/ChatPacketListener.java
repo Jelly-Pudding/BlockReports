@@ -5,7 +5,6 @@ import com.jellypudding.blockReports.util.ConnectionHelper;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
@@ -15,8 +14,6 @@ import net.minecraft.network.chat.RemoteChatSession;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 public class ChatPacketListener extends ChannelDuplexHandler {
     
@@ -122,29 +119,10 @@ public class ChatPacketListener extends ChannelDuplexHandler {
             if (plugin.isStripServerSignatures()) {
                 // Convert player chat to system chat to strip server signatures
                 try {
-                    // Access the known fields (from previous testing).
-                    Field bodyField = ClientboundPlayerChatPacket.class.getDeclaredField("body");
-                    Field chatTypeField = ClientboundPlayerChatPacket.class.getDeclaredField("chatType");
-                    
-                    bodyField.setAccessible(true);
-                    chatTypeField.setAccessible(true);
-                    
-                    Object bodyValue = bodyField.get(chatPacket);
-                    ChatType.Bound chatTypeBound = (ChatType.Bound) chatTypeField.get(chatPacket);
-                    
-                    // Extract content from the Packed body object
-                    Method contentMethod = bodyValue.getClass().getDeclaredMethod("content");
-                    contentMethod.setAccessible(true);
-                    String textContent = (String) contentMethod.invoke(bodyValue);
-                    
+                    String textContent = chatPacket.body().content();
                     Component rawMessage = Component.literal(textContent);
-                    
-                    // Use the direct decorate method available in ChatType.Bound
-                    Method decorateMethod = ChatType.Bound.class.getDeclaredMethod("decorate", Component.class);
-                    decorateMethod.setAccessible(true);
-                    Component decoratedMessage = (Component) decorateMethod.invoke(chatTypeBound, rawMessage);
-                    
-                    // Create system chat packet with the properly decorated message
+                    Component decoratedMessage = chatPacket.chatType().decorate(rawMessage);
+
                     ClientboundSystemChatPacket systemChatPacket = new ClientboundSystemChatPacket(decoratedMessage, false);
 
                     if (plugin.isLoggingEnabled()) {
@@ -177,7 +155,7 @@ public class ChatPacketListener extends ChannelDuplexHandler {
                     ServerboundChatSessionUpdatePacket neutralisedPacket = new ServerboundChatSessionUpdatePacket(neutralisedData);
                     
                     if (plugin.isLoggingEnabled()) {
-                        plugin.getLogger().info("✓ Neutralised chat session update packet");
+                        plugin.getLogger().info("Successfully neutralised chat session update packet");
                     }
 
                     super.channelRead(ctx, neutralisedPacket);

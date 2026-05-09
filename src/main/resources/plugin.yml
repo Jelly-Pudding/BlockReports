@@ -1,7 +1,7 @@
 name: BlockReports
-version: '1.3'
+version: '${version}'
 main: com.jellypudding.blockReports.BlockReports
-api-version: '1.21'
+api-version: '26.1.2'
 author: AlphaAlex115
 description: Blocks Minecraft chat reporting by stripping signatures, hiding warning popups, and preventing signature-based kicks.
 website: www.minecraftoffline.net

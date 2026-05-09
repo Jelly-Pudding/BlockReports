@@ -40,8 +40,9 @@ public final class BlockReports extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(new KickListener(this), this);
 
         // Register command.
-        getCommand("blockreports").setExecutor(new BlockReportsCommand(this));
-        getCommand("blockreports").setTabCompleter(new BlockReportsCommand(this));
+        BlockReportsCommand cmd = new BlockReportsCommand(this);
+        getCommand("blockreports").setExecutor(cmd);
+        getCommand("blockreports").setTabCompleter(cmd);
 
         // Initialise bStats
         int pluginId = 27559;

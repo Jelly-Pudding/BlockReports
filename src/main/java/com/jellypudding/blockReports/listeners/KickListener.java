@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerKickEvent.Cause;
 
 public class KickListener implements Listener {
 
@@ -23,24 +24,16 @@ public class KickListener implements Listener {
             return;
         }
 
-        try {
-            Class<? extends PlayerKickEvent> kickClass = event.getClass();
-            java.lang.reflect.Method getCause = kickClass.getMethod("getCause");
-            Enum<?> cause = (Enum<?>) getCause.invoke(event);
-            String paperReason = cause.name();
+        Cause cause = event.getCause();
+        if (cause == Cause.OUT_OF_ORDER_CHAT ||
+            cause == Cause.TOO_MANY_PENDING_CHATS ||
+            cause == Cause.EXPIRED_PROFILE_PUBLIC_KEY ||
+            cause == Cause.CHAT_VALIDATION_FAILED ||
+            cause == Cause.UNSIGNED_CHAT) {
 
-            if (paperReason.equals("OUT_OF_ORDER_CHAT") ||
-                paperReason.equals("TOO_MANY_PENDING_CHATS") ||
-                paperReason.equals("EXPIRED_PROFILE_PUBLIC_KEY") ||
-                paperReason.equals("CHAT_VALIDATION_FAILED") ||
-                paperReason.equals("UNSIGNED_CHAT")) {
-
-                event.setCancelled(true);
-                sendPreventedKickMessage(event, paperReason);
-                return;
-            }
-        } catch (Exception e) {
-            // Ignore reflection errors and fall back to string checking.
+            event.setCancelled(true);
+            sendPreventedKickMessage(event, cause.name());
+            return;
         }
 
         String reason = PlainTextComponentSerializer.plainText().serialize(event.reason());
