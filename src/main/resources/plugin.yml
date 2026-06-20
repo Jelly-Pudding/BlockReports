@@ -1,9 +1,9 @@
 name: BlockReports
-version: "1.4"
+version: "2.0"
 main: com.jellypudding.blockReports.BlockReports
-api-version: '26.1.2'
+api-version: '26.2'
 author: AlphaAlex115
-description: Blocks Minecraft chat reporting by stripping signatures, hiding warning popups, and preventing signature-based kicks.
+description: Blocks Minecraft chat reporting by stripping signatures, hiding warning popups, and preventing signature-based kicks. Also works around client-side chat blocking with command-based chat, private messaging and emotes.
 website: www.minecraftoffline.net
 
 commands:
@@ -12,8 +12,36 @@ commands:
     usage: "/blockreports reload"
     permission: blockreports.admin
     aliases: [br]
+  chat:
+    description: "Send a chat message via command to bypass client-side chat blocking"
+    usage: "/chat <message>"
+    permission: blockreports.chat
+    aliases: [c]
+  msg:
+    description: "Send a private message (works for players blocked from chatting)"
+    usage: "/msg <player> <message>"
+    permission: blockreports.message
+    aliases: [tell, w, t]
+  r:
+    description: "Reply to the last private message"
+    usage: "/r <message>"
+    permission: blockreports.message
+    aliases: [reply]
+  me:
+    description: "Send an emote/action message (works for players blocked from chatting)"
+    usage: "/me <action>"
+    permission: blockreports.me
 
 permissions:
   blockreports.admin:
     description: "Allows use of BlockReports commands"
     default: op
+  blockreports.chat:
+    description: "Allows sending messages with the /chat command"
+    default: true
+  blockreports.message:
+    description: "Allows using the private message commands"
+    default: true
+  blockreports.me:
+    description: "Allows using the /me emote command"
+    default: true

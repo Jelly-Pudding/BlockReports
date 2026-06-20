@@ -16,6 +16,15 @@ neutralise-chat-sessions: true
 # This handles various kick scenarios related to secure chat.
 prevent-chat-kicks: true
 
+# Provide a /chat command (alias /c) for sending messages.
+# Some accounts are blocked from chatting client-side (for example players in the UK).
+# /chat <message> is sent as a normal (unsigned and unreportable) chat message.
+enable-chat-command: true
+
+# Hint players about /chat on join (until they send their first message).
+# Useful for players blocked from chatting client-side.
+chat-command-hint: true
+
 # Enable debug logging - only enable this for development
 # as it's verbose.
 enable-logging: false

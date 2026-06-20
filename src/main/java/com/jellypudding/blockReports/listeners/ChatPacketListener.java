@@ -2,10 +2,12 @@ package com.jellypudding.blockReports.listeners;
 
 import com.jellypudding.blockReports.BlockReports;
 import com.jellypudding.blockReports.util.ConnectionHelper;
+import net.minecraft.ChatFormatting;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerChatPacket;
 import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
@@ -58,7 +60,7 @@ public class ChatPacketListener extends ChannelDuplexHandler {
             
             if (plugin.isLoggingEnabled()) {
                 String playerName = (player != null) ? player.getName() : address.getHostAddress();
-                plugin.getLogger().info("✓ Injected packet listener for player: " + playerName);
+                plugin.getLogger().info("Injected packet listener for player: " + playerName);
             }
                 
         } catch (Exception e) {
@@ -109,24 +111,30 @@ public class ChatPacketListener extends ChannelDuplexHandler {
                 loginPacket.showDeathScreen(),
                 loginPacket.doLimitedCrafting(),
                 loginPacket.commonPlayerSpawnInfo(),
-                true // Pretend enforce-secureprofile is true to hide the popup warning.
+                loginPacket.onlineMode(),
+                true // Pretend enforce-secure-profile is true to hide the popup warning.
             );
-            
+
             if (plugin.isLoggingEnabled()) {
-                plugin.getLogger().info("✓ Spoofed secure profile in login packet to hide chat warning");
+                plugin.getLogger().info("Spoofed secure profile in login packet to hide chat warning");
             }
         } else if (packet instanceof ClientboundPlayerChatPacket chatPacket) {
             if (plugin.isStripServerSignatures()) {
                 // Convert player chat to system chat to strip server signatures
                 try {
                     String textContent = chatPacket.body().content();
-                    Component rawMessage = Component.literal(textContent);
-                    Component decoratedMessage = chatPacket.chatType().decorate(rawMessage);
+                    // Format as "name: message" instead of vanilla "<name> message". The
+                    // client reads the name inside <...> to apply account chat filters
+                    // (friends-only / blocked-player) which hide messages from affected players.
+                    Component decoratedMessage = Component.empty()
+                        .append(chatPacket.chatType().name())
+                        .append(Component.literal(": ").withStyle(ChatFormatting.WHITE))
+                        .append(Component.literal(textContent).withStyle(ChatFormatting.WHITE));
 
                     ClientboundSystemChatPacket systemChatPacket = new ClientboundSystemChatPacket(decoratedMessage, false);
 
                     if (plugin.isLoggingEnabled()) {
-                        plugin.getLogger().info("✓ Converted chat packet to system chat (stripped signature)");
+                        plugin.getLogger().info("Converted chat packet to system chat (stripped signature)");
                     }
 
                     super.write(ctx, systemChatPacket, promise);
@@ -135,8 +143,25 @@ public class ChatPacketListener extends ChannelDuplexHandler {
                     plugin.getLogger().warning("Failed to convert chat packet: " + e.getMessage());
                 }
             }
+        } else if (packet instanceof ClientboundDisguisedChatPacket disguisedPacket) {
+            if (plugin.isStripServerSignatures()) {
+                try {
+                    Component decoratedMessage = disguisedPacket.chatType().decorate(disguisedPacket.message());
+
+                    ClientboundSystemChatPacket systemChatPacket = new ClientboundSystemChatPacket(decoratedMessage, false);
+
+                    if (plugin.isLoggingEnabled()) {
+                        plugin.getLogger().info("Converted disguised chat packet to system chat");
+                    }
+
+                    super.write(ctx, systemChatPacket, promise);
+                    return;
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Failed to convert disguised chat packet: " + e.getMessage());
+                }
+            }
         }
-        
+
         super.write(ctx, packet, promise);
     }
     

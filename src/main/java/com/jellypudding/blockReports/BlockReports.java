@@ -1,6 +1,10 @@
 package com.jellypudding.blockReports;
 
 import com.jellypudding.blockReports.commands.BlockReportsCommand;
+import com.jellypudding.blockReports.commands.ChatCommand;
+import com.jellypudding.blockReports.commands.EmoteCommand;
+import com.jellypudding.blockReports.commands.MessageCommand;
+import com.jellypudding.blockReports.listeners.BlockedChatNotifier;
 import com.jellypudding.blockReports.listeners.ChatPacketListener;
 import com.jellypudding.blockReports.listeners.KickListener;
 import net.minecraft.server.MinecraftServer;
@@ -17,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class BlockReports extends JavaPlugin implements Listener {
 
     private ChatPacketListener packetListener;
+    private BlockedChatNotifier blockedChatNotifier;
     private FileConfiguration config;
     private boolean enableLogging;
 
@@ -31,18 +36,35 @@ public final class BlockReports extends JavaPlugin implements Listener {
 
         // Initialise packet listener.
         packetListener = new ChatPacketListener(this);
-        
+        blockedChatNotifier = new BlockedChatNotifier(this);
+
         // Inject for currently online players (if any).
         packetListener.inject();
 
         // Register listeners.
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(new KickListener(this), this);
+        getServer().getPluginManager().registerEvents(blockedChatNotifier, this);
 
         // Register command.
         BlockReportsCommand cmd = new BlockReportsCommand(this);
         getCommand("blockreports").setExecutor(cmd);
         getCommand("blockreports").setTabCompleter(cmd);
+
+        // Command-based chat so players blocked from chatting by their account
+        // settings can still communicate (commands bypass the client-side block).
+        getCommand("chat").setExecutor(new ChatCommand(this));
+
+        // Private messaging that works for blocked players (vanilla /msg is blocked
+        // client-side because it carries a signed message argument).
+        MessageCommand messageCommand = new MessageCommand(this);
+        getCommand("msg").setExecutor(messageCommand);
+        getCommand("msg").setTabCompleter(messageCommand);
+        getCommand("r").setExecutor(messageCommand);
+
+        // Emote command (/me) that works for blocked players (vanilla /me is blocked
+        // client-side because it carries a signed message argument).
+        getCommand("me").setExecutor(new EmoteCommand(this));
 
         // Initialise bStats
         int pluginId = 27559;
@@ -139,6 +161,14 @@ public final class BlockReports extends JavaPlugin implements Listener {
 
     public boolean isPreventChatKicks() {
         return config.getBoolean("prevent-chat-kicks", true);
+    }
+
+    public boolean isChatCommandEnabled() {
+        return config.getBoolean("enable-chat-command", true);
+    }
+
+    public boolean isChatCommandHintEnabled() {
+        return config.getBoolean("chat-command-hint", true);
     }
 
     public boolean isLoggingEnabled() {
