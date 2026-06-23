@@ -87,9 +87,6 @@ public class ChatCommand implements CommandExecutor {
         Component rendered = player.displayName()
             .append(Component.text(": ", NamedTextColor.WHITE))
             .append(event.message().colorIfAbsent(NamedTextColor.WHITE));
-        for (Player recipient : plugin.getServer().getOnlinePlayers()) {
-            recipient.sendMessage(rendered);
-        }
-        plugin.getServer().getConsoleSender().sendMessage(rendered);
+        plugin.getServer().broadcast(rendered);
     }
 }
